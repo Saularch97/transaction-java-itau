@@ -26,16 +26,6 @@ class TransactionController(val transactionService : TransactionService) {
     fun createTransaction(@RequestBody transactionRequest : TransactionRequest) : ResponseEntity<Unit> {
         logger.info("Creating transaction with value ${transactionRequest.value}")
 
-        if (transactionRequest.value == null) {
-            logger.error("Transaction value not provided!")
-            return ResponseEntity.status(HttpStatusCode.valueOf(422)).build()
-        }
-
-        if (transactionRequest.value <= 0.0) {
-            logger.error("Transaction with negative value of ${transactionRequest.value}!")
-            return ResponseEntity.status(HttpStatusCode.valueOf(422)).build()
-        }
-
         transactionService.createTransaction(transactionRequest)
 
         return ResponseEntity.status(HttpStatus.CREATED).build()

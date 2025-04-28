@@ -1,6 +1,7 @@
 package com.br.desafio_java_transacoes.services
 
 import com.br.desafio_java_transacoes.controllers.TransactionController
+import com.br.desafio_java_transacoes.exceptions.InvalidTransactionException
 import com.br.desafio_java_transacoes.model.dto.TransactionDto
 import com.br.desafio_java_transacoes.model.request.TransactionRequest
 import com.br.desafio_java_transacoes.model.response.StatisticsResponse
@@ -8,6 +9,8 @@ import com.br.desafio_java_transacoes.model.response.TransactionResponse
 import com.br.desafio_java_transacoes.repositories.TransactionRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatusCode
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
 import kotlin.system.measureTimeMillis
@@ -19,6 +22,18 @@ class TransactionService(val transactionRepository : TransactionRepository) {
     private val logger: Logger = LoggerFactory.getLogger(TransactionService::class.java)
 
     fun createTransaction(request: TransactionRequest) : TransactionResponse {
+        logger.error("Transaction value ${request.value}")
+
+        if (request.value == null) {
+            logger.error("Transaction value not provided! Transaction ${request.value}")
+            throw InvalidTransactionException("Transaction value not provided!")
+        }
+
+        if (request.value <= 0.0) {
+            logger.error("Transaction value not provided! Transaction ${request.value}")
+            throw InvalidTransactionException("Transaction value not provided!")
+        }
+
         return transactionRepository.createTransaction(request)
     }
 
