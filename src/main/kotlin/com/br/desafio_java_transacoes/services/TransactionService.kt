@@ -7,6 +7,7 @@ import com.br.desafio_java_transacoes.model.response.TransactionResponse
 import com.br.desafio_java_transacoes.repositories.TransactionRepository
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
+import kotlin.time.Duration.Companion.seconds
 
 @Service
 class TransactionService(val transactionRepository : TransactionRepository) {
@@ -19,28 +20,21 @@ class TransactionService(val transactionRepository : TransactionRepository) {
         return transactionRepository.deleteAllTransactions()
     }
 
-    fun getStatistics(seconds : Int) : StatisticsResponse {
-        val allTransactions = transactionRepository.getAllTransactions()
+    fun getStatistics(seconds : Int, now: ZonedDateTime = ZonedDateTime.now()) : StatisticsResponse {
 
-        val timeNow = ZonedDateTime.now()
-        val timeBefore = timeNow.minusSeconds(seconds.toLong())
-        val transactionsOccurredInPeriod = mutableListOf<TransactionDto>()
-
-        allTransactions.forEach { transactionDto ->
-            if (transactionDto.date.isBefore(timeNow) && transactionDto.date.isAfter(timeBefore)) {
-                transactionsOccurredInPeriod.add(transactionDto)
-            }
-        }
+        val transactionsOccurredInPeriod = transactionRepository.getAllTransactions()
+            .filter { it.date.isAfter(now.minusSeconds(seconds.toLong())) }
 
         if (transactionsOccurredInPeriod.isEmpty()) {
             return StatisticsResponse(0, 0.0, 0.0, 0.0, 0.0)
         }
 
-        transactionsOccurredInPeriod.sortWith(compareBy { it.value })
+        transactionsOccurredInPeriod
+            .toMutableList()
+            .sortWith(compareBy { it.value })
 
         val min = transactionsOccurredInPeriod.first()
         val max = transactionsOccurredInPeriod.last()
-
         val count = transactionsOccurredInPeriod.size
 
         val sum = transactionsOccurredInPeriod.reduceOrNull {acc, dto ->
