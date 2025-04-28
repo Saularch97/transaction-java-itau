@@ -3,6 +3,8 @@ package com.br.desafio_java_transacoes.controllers
 import com.br.desafio_java_transacoes.model.request.TransactionRequest
 import com.br.desafio_java_transacoes.model.response.StatisticsResponse
 import com.br.desafio_java_transacoes.services.TransactionService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -18,23 +20,37 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("api")
 class TransactionController(val transactionService : TransactionService) {
 
+    private val logger: Logger = LoggerFactory.getLogger(TransactionController::class.java)
+
     @PostMapping("/transaction")
     fun createTransaction(@RequestBody transactionRequest : TransactionRequest) : ResponseEntity<Unit> {
-        if (transactionRequest.value == null) return ResponseEntity.status(HttpStatusCode.valueOf(422)).build()
-        if (transactionRequest.value <= 0.0) return ResponseEntity.status(HttpStatusCode.valueOf(422)).build()
+        logger.info("Creating transaction with value ${transactionRequest.value}")
+
+        if (transactionRequest.value == null) {
+            logger.error("Transaction value not provided!")
+            return ResponseEntity.status(HttpStatusCode.valueOf(422)).build()
+        }
+
+        if (transactionRequest.value <= 0.0) {
+            logger.error("Transaction with negative value of ${transactionRequest.value}!")
+            return ResponseEntity.status(HttpStatusCode.valueOf(422)).build()
+        }
+
         transactionService.createTransaction(transactionRequest)
 
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
     @DeleteMapping("/transaction")
-    fun deleteAllTransactions() : ResponseEntity<Unit>{
+    fun deleteAllTransactions() : ResponseEntity<Unit> {
+        logger.info("Deleting all transactions")
         transactionService.deleteAllTransactions()
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @GetMapping("/statistics/{seconds}")
-    fun getStatistics(@PathVariable seconds : Int) : ResponseEntity<StatisticsResponse>{
+    fun getStatistics(@PathVariable seconds : Int) : ResponseEntity<StatisticsResponse> {
+        logger.info("Getting statistics all transactions from the last $seconds seconds")
         return ResponseEntity.ok(transactionService.getStatistics(seconds))
     }
 
