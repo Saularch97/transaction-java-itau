@@ -109,9 +109,3 @@ http://localhost:8080/swagger-ui.html
 - **Spring Actuator**: For application metrics and monitoring
 - **Springdoc OpenAPI**: For automatic API documentation (Swagger)
 - **Gradle**: Build automation tool
-
----
-
-## **Conclusion**
-
-Now you're ready to run and test your Spring Boot + Kotlin application. If you have any questions or encounter any issues during setup, feel free to ask!
